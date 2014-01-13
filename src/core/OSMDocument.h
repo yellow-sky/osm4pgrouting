@@ -61,7 +61,7 @@ public:
 	//! find node by using an ID
 	Node* FindNode( long long nodeRefId ) const;
 	//! split the ways
-	void SplitWays();
+	//void SplitWays();
 	//Node* getNode( long long nodeRefId );
 
 	void AddRelation( Relation* r );

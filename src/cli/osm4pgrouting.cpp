@@ -22,7 +22,7 @@
 #include "Configuration.h"
 #include "ConfigurationParserCallback.h"
 #include "OSMDocument.h"
-#include "OSMDocumentParserCallback.h"
+#include "OSMDocumentParser.h"
 #include "Way.h"
 #include "Node.h"
 #include "Relation.h"
@@ -175,7 +175,7 @@ int main(int argc, char* argv[])
     cout << "Trying to load data" << endl;
 
     OSMDocument* document = new OSMDocument(*config);
-    OSMDocumentParserCallback callback(*document, &test);
+    OSMDocumentParser callback(*document, &test);
 
     cout << "Trying to parse data" << endl;
 
@@ -190,24 +190,13 @@ int main(int argc, char* argv[])
     
     
      //############# Export2DB
-    {
-	cout << "Split ways" << endl;
-	document->SplitWays();
-
-        cout << "Adding relations to database..." << endl;
-        test.exportRelations(document->m_Relations, config);
-
-        // Optional user argument skipnodes will not add nodes to the database (saving a lot of time if not necessary)
-        if ( !skipnodes) {
-            cout << "Adding nodes to database..." << endl;
-            test.exportNodes(document->m_Nodes);
-        }
-
-        cout << "Adding ways to database..." << endl;
-        test.exportWays(document->m_SplittedWays, config);
-    }
-    //#############
+    callback.SaveAllBuffers();
     
+    //############# Split Ways
+    cout << "Split ways" << endl;
+    //document->SplitWays();
+
+    //############# CreateTopology
     cout << "Creating topology..." << endl;
     test.createTopology();
     

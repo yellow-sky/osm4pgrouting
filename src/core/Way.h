@@ -50,7 +50,7 @@ class Way
 {
 public:
 	//! Do not delete nodes in this container!
-	std::vector<Node*> m_NodeRefs;
+	std::vector<long long> m_NodeIds;
 	std::map<std::string, std::string> m_Tags;
 	//! ID of the way
 	long long id;
@@ -91,7 +91,7 @@ public:
 	 *	saves the nodes of the way  
 	 *	@param pNode node
 	 */
-	void AddNodeRef( Node* pNode );
+	void AddNodeRef( long long NodeId);
 	void AddTag( std::string key, std::string value);
 	bool HasTag(std::string key);
 };

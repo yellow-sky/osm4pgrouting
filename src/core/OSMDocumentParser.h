@@ -35,47 +35,58 @@ class Relation;
 /**
 	Parser callback for OSMDocument files
 */
-class OSMDocumentParserCallback : public xml::XMLParserCallback
-{	
-	//! reference to a OSMDocument object
-	OSMDocument& m_rDocument;
-	//! current way, which will be parsed
-	Way* m_pActWay;
-	Relation* m_pActRelation;
-	Export2DB* m_pExporter;
-	
-	int m_iProcessed;
+class OSMDocumentParser : public xml::XMLParserCallback
+{
+    //! reference to a OSMDocument object
+    OSMDocument& m_rDocument;
+    std::vector<Node*> m_Nodes;
+    std::vector<Way*> m_Ways;
+    std::vector<Relation*> m_Relations;
 
-	virtual void StartElement( const char *name, const char** atts );
+    
+    //! current way, which will be parsed
+    Way* m_pActWay;
+    Relation* m_pActRelation;
+    Export2DB* m_pExporter;
 
-	virtual void EndElement( const char* name );
+    long m_iChunkSize; 
+    long m_iProcessed;
+    long long m_iTotal;
 
-	virtual void SetContent( const char* ch, int len)
-	{
-	}
+    virtual void StartElement( const char *name, const char** atts );
 
-	virtual void ProcessingInstruction( const char* target, const char* data )
-	{
-	}
+    virtual void EndElement( const char* name );
 
-	virtual void CDataBlockInternal(const char *value, int len)
-	{
-	}
+    virtual void SetContent( const char* ch, int len)
+    {
+    }
+
+    virtual void ProcessingInstruction( const char* target, const char* data )
+    {
+    }
+
+    virtual void CDataBlockInternal(const char *value, int len)
+    {
+    }
 
 
 public:
-	/**
-	 *	Constructor
-	 */
-	OSMDocumentParserCallback( OSMDocument& doc, Export2DB* exp)
-	:
-		m_rDocument( doc ),
-		m_pActWay( 0 ),
-		m_pActRelation( 0 )
-	{
-	  m_pExporter = exp;
-	  m_pExporter = 0;
-	}
+    /**
+     *	Constructor
+     */
+    OSMDocumentParser( OSMDocument& doc, Export2DB* exp, long chunkSize = 100000)
+        :
+        m_rDocument( doc ),
+        m_pActWay( 0 ),
+        m_pActRelation( 0 )
+    {
+        m_pExporter = exp;
+        m_iProcessed = 0;
+        m_iTotal = 0;
+	m_iChunkSize = chunkSize;
+    }
+    
+    void SaveAllBuffers();
 
 }; // class OSMDocumentParserCallback
 

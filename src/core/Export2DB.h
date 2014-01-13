@@ -60,7 +60,7 @@ public:
  	//! creates needed tables
  	void createTables();
  	//! exports nodes to the database
- 	void exportNodes(std::map<long long, Node*>& nodes);
+ 	void exportNodes(std::vector<Node*>& nodes);
  	//! exports ways to the database
  	void exportWays(std::vector<Way*>& ways, Configuration* config);
  	void exportRelations(std::vector<Relation*>& relations, Configuration* config);

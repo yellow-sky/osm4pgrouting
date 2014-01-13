@@ -41,9 +41,9 @@ Way::~Way()
 {
 }
 
-void Way::AddNodeRef( Node* pNode )
+void Way::AddNodeRef( long long NodeId )
 {
-	if( pNode ) m_NodeRefs.push_back(pNode);
+	m_NodeIds.push_back(NodeId);
 }
 
 void Way::AddTag( std::string key , std::string value)

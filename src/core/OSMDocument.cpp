@@ -62,7 +62,7 @@ const
 	std::map<long long, Node*>::const_iterator  it = m_Nodes.find( nodeRefId );
 	return (it!=m_Nodes.end() ) ? it->second : 0;
 }
-
+/*
 void OSMDocument::SplitWays()
 {
 	
@@ -168,7 +168,7 @@ void OSMDocument::SplitWays()
 	}
 
 } // end SplitWays
-
+*/
 void OSMDocument::Clear()
 {
   ez_mapdelete( m_Nodes );
