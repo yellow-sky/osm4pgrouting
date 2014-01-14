@@ -24,11 +24,11 @@
 #include <string.h>
 #include "XMLParser.h"
 #include "Export2DB.h"
+#include "Configuration.h"
 
 namespace osm
 {
 
-class OSMDocument;
 class Way;
 class Relation;
 
@@ -38,11 +38,11 @@ class Relation;
 class OSMDocumentParser : public xml::XMLParserCallback
 {
     //! reference to a OSMDocument object
-    OSMDocument& m_rDocument;
     std::vector<Node*> m_Nodes;
     std::vector<Way*> m_Ways;
     std::vector<Relation*> m_Relations;
-
+    
+    Configuration& m_rConfig;
     
     //! current way, which will be parsed
     Way* m_pActWay;
@@ -74,9 +74,9 @@ public:
     /**
      *	Constructor
      */
-    OSMDocumentParser( OSMDocument& doc, Export2DB* exp, long chunkSize = 100000)
+    OSMDocumentParser( Configuration& config, Export2DB* exp, long chunkSize = 100000)
         :
-        m_rDocument( doc ),
+        m_rConfig( config ),
         m_pActWay( 0 ),
         m_pActRelation( 0 )
     {

@@ -20,7 +20,6 @@
 
 #include "stdafx.h"
 #include "ConfigurationParserCallback.h"
-#include "OSMDocument.h"
 #include "Configuration.h"
 #include "Type.h"
 #include "Class.h"

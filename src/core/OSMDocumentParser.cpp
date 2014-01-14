@@ -20,7 +20,6 @@
 
 #include "stdafx.h"
 #include "OSMDocumentParser.h"
-#include "OSMDocument.h"
 #include "Relation.h"
 #include "Way.h"
 #include "Node.h"
@@ -148,6 +147,27 @@ void OSMDocumentParser::StartElement( const char *name, const char** atts )
             }
         }
     }
+    // THIS IS THE RELATION CODE...
+    else if( strcmp(name,"relation") == 0 )
+    {
+        if (atts != NULL)
+        {
+            long long id=-1;
+            const char** attribut = (const char**)atts;
+            while( *attribut != NULL )
+            {
+                const char* name = *attribut++;
+                const char* value = *attribut++;
+                if( strcmp( name, "id" ) == 0 )
+                {
+                    id = atoll( value);
+                }
+            }
+            if( id>0 ) m_pActRelation = new Relation( id );
+            // std::cout<<"Starting relation: "<<id<<std::endl;
+
+        }
+    }
     // END OF THE RELATIONS CODE
     else if( strcmp(name,"tag") == 0 )
     {
@@ -236,13 +256,13 @@ void OSMDocumentParser::StartElement( const char *name, const char** atts )
                     m_pActWay->maxspeed_forward=mspeed_fwd;
                 }
                 //else if( m_pActWay && k.compare("highway")==0 )
-                else if( m_pActWay && m_rDocument.m_rConfig.m_Types.count(k) )
+                else if( m_pActWay && m_rConfig.m_Types.count(k) )
                 {
                     m_pActWay->type = k;
                     m_pActWay->clss = v;
 
 
-                    if( m_rDocument.m_rConfig.m_Types.count(m_pActWay->type) && m_rDocument.m_rConfig.m_Types[m_pActWay->type]->m_Classes.count(m_pActWay->clss) ) {
+                    if( m_rConfig.m_Types.count(m_pActWay->type) && m_rConfig.m_Types[m_pActWay->type]->m_Classes.count(m_pActWay->clss) ) {
 
                         m_pActWay->AddTag( k, v );
 
@@ -250,20 +270,20 @@ void OSMDocumentParser::StartElement( const char *name, const char** atts )
 
                         //set default maxspeed values from classes, if not set previously (default: -1)
                         if(m_pActWay->maxspeed_forward<=0) {
-                            int newValue = m_rDocument.m_rConfig.m_Types[m_pActWay->type]->m_Classes[m_pActWay->clss]->default_maxspeed;
+                            int newValue = m_rConfig.m_Types[m_pActWay->type]->m_Classes[m_pActWay->clss]->default_maxspeed;
                             m_pActWay->maxspeed_forward = newValue;
                         }
                         if(m_pActWay->maxspeed_backward<=0) {
-                            int newValue = m_rDocument.m_rConfig.m_Types[m_pActWay->type]->m_Classes[m_pActWay->clss]->default_maxspeed;
+                            int newValue = m_rConfig.m_Types[m_pActWay->type]->m_Classes[m_pActWay->clss]->default_maxspeed;
                             m_pActWay->maxspeed_backward = newValue;
                         }
 
                     }
                 }
                 // START TAG FOR RELATION
-                else if( m_pActRelation && m_rDocument.m_rConfig.m_Types.count(k))
+                else if( m_pActRelation && m_rConfig.m_Types.count(k))
                 {
-                    if( m_rDocument.m_rConfig.m_Types.count(k) && m_rDocument.m_rConfig.m_Types[k]->m_Classes.count(v) ) {
+                    if( m_rConfig.m_Types.count(k) && m_rConfig.m_Types[k]->m_Classes.count(v) ) {
 
                         m_pActRelation->AddTag( k, v );
                         // std::cout<<"Added Relation tag: "<<k<<" "<<v<<std::endl;
@@ -322,7 +342,7 @@ void OSMDocumentParser::EndElement( const char* name )
         //#ifdef RESTRICT
         //_FILTER
 
-        if( m_rDocument.m_rConfig.m_Types.count(m_pActWay->type) && m_rDocument.m_rConfig.m_Types[m_pActWay->type]->m_Classes.count(m_pActWay->clss) )
+        if( m_rConfig.m_Types.count(m_pActWay->type) && m_rConfig.m_Types[m_pActWay->type]->m_Classes.count(m_pActWay->clss) )
         {
             //#endif
 
@@ -343,7 +363,7 @@ void OSMDocumentParser::EndElement( const char* name )
                     m_Nodes.clear();
                 }
 
-                m_pExporter->exportWays(m_Ways, m_rDocument.GetConfig());
+                m_pExporter->exportWays(m_Ways, &m_rConfig);
                 ez_vectordelete( m_Ways );
                 m_Ways.clear();
                 //#############
@@ -385,12 +405,12 @@ void OSMDocumentParser::EndElement( const char* name )
             
             if (m_Ways.size()>0) //save buffered ways
             {
-                m_pExporter->exportWays(m_Ways, m_rDocument.GetConfig());
+                m_pExporter->exportWays(m_Ways, &m_rConfig);
 		ez_vectordelete( m_Ways );
 		m_Ways.clear();
             }
 
-            m_pExporter->exportRelations(m_Relations, m_rDocument.GetConfig());
+            m_pExporter->exportRelations(m_Relations, &m_rConfig);
             ez_vectordelete( m_Relations );
             m_Relations.clear();
             //#############
@@ -410,25 +430,23 @@ void OSMDocumentParser::EndElement( const char* name )
 
 void OSMDocumentParser::SaveAllBuffers()
 {
-          
-            //############# Export2DB
-            if (m_Nodes.size()>0) //save buffered points
+            if (m_Nodes.size()>0)	//save buffered points
             {
                 m_pExporter->exportNodes(m_Nodes);
                 ez_vectordelete( m_Nodes );
                 m_Nodes.clear();
             }
             
-            if (m_Ways.size()>0) //save buffered ways
+            if (m_Ways.size()>0)	//save buffered ways
             {
-                m_pExporter->exportWays(m_Ways, m_rDocument.GetConfig());
+                m_pExporter->exportWays(m_Ways, &m_rConfig);
 		ez_vectordelete( m_Ways );
 		m_Ways.clear();
             }
 
-            if (m_Relations.size()>0)
+            if (m_Relations.size()>0)	//save buffered relations
 	    {
-	      m_pExporter->exportRelations(m_Relations, m_rDocument.GetConfig());
+	      m_pExporter->exportRelations(m_Relations, &m_rConfig);
 	      ez_vectordelete( m_Relations );
 	      m_Relations.clear();
 	    }

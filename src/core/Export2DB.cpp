@@ -94,6 +94,20 @@ void Export2DB::createTables()
     } else {
         std::cout << "Ways table created" << std::endl;
     }
+    
+    // gid cannot be "bigint" right now because pgRouting doesn't support "bigint"
+    std::string create_ways_temporary("CREATE TABLE " + tables_prefix + "ways_temporary (gid integer, class_id integer not null, length double precision, name text, x1 double precision, y1 double precision, x2 double precision, y2 double precision, reverse_cost double precision, rule text, to_cost double precision, maxspeed_forward integer, maxspeed_backward integer, osm_id bigint, priority double precision DEFAULT 1);");
+	result = PQexec(mycon, create_ways_temporary.c_str());
+	if (PQresultStatus(result) != PGRES_COMMAND_OK)
+    {
+        std::cerr << PQresultStatus(result);
+        std::cerr << "create ways_temporary failed: "
+        << PQerrorMessage(mycon)
+        << std::endl;
+        PQclear(result);
+    } else {
+        std::cout << "Ways_temporary table created" << std::endl;
+    }
 
     std::string create_types("CREATE TABLE " + tables_prefix + "types (id integer PRIMARY KEY, name text);");
 	result = PQexec(mycon, create_types.c_str());

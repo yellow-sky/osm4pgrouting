@@ -21,7 +21,6 @@
 #include "stdafx.h"
 #include "Configuration.h"
 #include "ConfigurationParserCallback.h"
-#include "OSMDocument.h"
 #include "OSMDocumentParser.h"
 #include "Way.h"
 #include "Node.h"
@@ -174,8 +173,7 @@ int main(int argc, char* argv[])
     //############# Load Data    
     cout << "Trying to load data" << endl;
 
-    OSMDocument* document = new OSMDocument(*config);
-    OSMDocumentParser callback(*document, &test);
+    OSMDocumentParser callback(*config, &test);
 
     cout << "Trying to parse data" << endl;
 
@@ -204,8 +202,8 @@ int main(int argc, char* argv[])
 
     cout << "#########################" << endl;
 
-    cout << "size of streets: " << document->m_Ways.size() <<	endl;
-    cout << "size of splitted ways : " << document->m_SplittedWays.size() <<	endl;
+    //cout << "size of streets: " << document->m_Ways.size() <<	endl;
+    //cout << "size of splitted ways : " << document->m_SplittedWays.size() <<	endl;
 
     cout << "finished" << endl;
 
