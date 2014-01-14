@@ -324,7 +324,7 @@ void Export2DB::exportWays(std::vector<Way*>& ways, Configuration* config)
 	PQendcopy(mycon);
 
 	it_way = ways.begin();
-    std::string copy_ways( "COPY " + tables_prefix + "ways(gid, class_id, length, x1, y1, x2, y2, osm_id, reverse_cost, maxspeed_forward, maxspeed_backward, priority, name) FROM STDIN");
+    std::string copy_ways( "COPY " + tables_prefix + "ways_temporary(gid, class_id, length, x1, y1, x2, y2, osm_id, reverse_cost, maxspeed_forward, maxspeed_backward, priority, name) FROM STDIN");
 	res = PQexec(mycon, copy_ways.c_str());								//the_geom,
 	while( it_way!=last_way )
 	{

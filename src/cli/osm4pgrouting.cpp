@@ -173,11 +173,11 @@ int main(int argc, char* argv[])
     //############# Load Data    
     cout << "Trying to load data" << endl;
 
-    OSMDocumentParser callback(*config, &test);
+    OSMDocumentParser osmParser(*config, &test);
 
     cout << "Trying to parse data" << endl;
 
-    ret = parser.Parse( callback, file.c_str() );
+    ret = parser.Parse( osmParser, file.c_str() );
     if( ret!=0 ) {
         if( ret == 1 )
             cerr << "Failed to open data file" << endl;
@@ -188,7 +188,7 @@ int main(int argc, char* argv[])
     
     
      //############# Export2DB
-    callback.SaveAllBuffers();
+    osmParser.SaveAllBuffers();
     
     //############# Split Ways
     cout << "Split ways" << endl;
