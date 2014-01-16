@@ -133,7 +133,7 @@ void Export2DB::createTables()
         std::cout << "Way_tag table created" << std::endl;
     }
     
-    std::string create_way_nodes("CREATE TABLE " + tables_prefix + "way_nodes (way_id bigint, node_id bigint);");
+    std::string create_way_nodes("CREATE TABLE " + tables_prefix + "way_nodes (id SERIAL, way_id bigint, node_id bigint);");
 	result = PQexec(mycon, create_way_nodes.c_str());
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
     {
@@ -181,6 +181,10 @@ void Export2DB::createTables()
 		std::cout << "Classes table created" << std::endl;
 	}
 }
+
+
+
+
 
 void Export2DB::dropTables()
 {
@@ -324,8 +328,8 @@ void Export2DB::exportWays(std::vector<Way*>& ways, Configuration* config)
 	PQendcopy(mycon);
 
 	it_way = ways.begin();
-    std::string copy_ways( "COPY " + tables_prefix + "ways_temporary(gid, class_id, length, x1, y1, x2, y2, osm_id, reverse_cost, maxspeed_forward, maxspeed_backward, priority, name) FROM STDIN");
-	res = PQexec(mycon, copy_ways.c_str());								//the_geom,
+    std::string copy_ways( "COPY " + tables_prefix + "ways_temporary(gid, class_id, length, osm_id, reverse_cost, maxspeed_forward, maxspeed_backward, priority, name) FROM STDIN");
+	res = PQexec(mycon, copy_ways.c_str());
 	while( it_way!=last_way )
 	{
 		Way* way = *it_way++;
@@ -341,18 +345,8 @@ void Export2DB::exportWays(std::vector<Way*>& ways, Configuration* config)
 			row_data += TO_STR(way->length);
 
 		row_data += "\t";
-		row_data += TO_STR(way->m_NodeIds.front()); //->lon);
-		row_data += "\t";
-		row_data += TO_STR(way->m_NodeIds.front()); //->lat);
-		row_data += "\t";
-		row_data += TO_STR(way->m_NodeIds.back()); //->lon);
-		row_data += "\t";
-		row_data += TO_STR(way->m_NodeIds.back()); //->lat);
-		row_data += "\t";
 		row_data += TO_STR(way->osm_id);
 		row_data += "\t";
-		//row_data += "NULL"; //"srid=4326;" + way->geom;
-		//row_data += "\t";
 
 		//reverse_cost
 		if(way->oneWayType==YES)
