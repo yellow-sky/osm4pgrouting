@@ -124,23 +124,14 @@ void OSMDocumentParser::StartElement( const char *name, const char** atts )
             }
             if( id>0 )
             {
-                //m_rDocument.AddNode( new Node( id, lat, lon ) );
                 m_Nodes.push_back(new Node( id, lat, lon ));
-
 
                 m_iProcessed++;
                 if (m_iProcessed >= m_iChunkSize)
                 {
-                    //############# Export2DB
-                    // Optional user argument skipnodes will not add nodes to the database (saving a lot of time if not necessary)
-
-                    m_pExporter->exportNodes(m_Nodes);
-                    ez_vectordelete( m_Nodes );
-                    m_Nodes.clear();
-
-                    //#############
+                    SaveAllBuffers();
                     m_iTotal+=m_iProcessed;
-                    std::cout << "Total points: " << m_iTotal << std::endl;
+                    std::cout << "Total ojects: " << m_iTotal << std::endl;
                     m_iProcessed=0;
                 }
 
@@ -355,20 +346,9 @@ void OSMDocumentParser::EndElement( const char* name )
             m_iProcessed++;
             if (m_iProcessed >= m_iChunkSize)
             {
-                //############# Export2DB
-                if (m_Nodes.size()>0) //save buffered points
-                {
-                    m_pExporter->exportNodes(m_Nodes);
-                    ez_vectordelete( m_Nodes );
-                    m_Nodes.clear();
-                }
-
-                m_pExporter->exportWays(m_Ways, &m_rConfig);
-                ez_vectordelete( m_Ways );
-                m_Ways.clear();
-                //#############
+                SaveAllBuffers();
                 m_iTotal+=m_iProcessed;
-                std::cout << "Total ways: " << m_iTotal << std::endl;
+                std::cout << "Total objects: " << m_iTotal << std::endl;
                 m_iProcessed=0;
             }
 
@@ -395,27 +375,9 @@ void OSMDocumentParser::EndElement( const char* name )
         m_iProcessed++;
         if (m_iProcessed >= m_iChunkSize)
         {
-            //############# Export2DB
-            if (m_Nodes.size()>0) //save buffered points
-            {
-                m_pExporter->exportNodes(m_Nodes);
-                ez_vectordelete( m_Nodes );
-                m_Nodes.clear();
-            }
-            
-            if (m_Ways.size()>0) //save buffered ways
-            {
-                m_pExporter->exportWays(m_Ways, &m_rConfig);
-		ez_vectordelete( m_Ways );
-		m_Ways.clear();
-            }
-
-            m_pExporter->exportRelations(m_Relations, &m_rConfig);
-            ez_vectordelete( m_Relations );
-            m_Relations.clear();
-            //#############
+            SaveAllBuffers();
             m_iTotal+=m_iProcessed;
-            std::cout << "Total rels: " << m_iTotal << std::endl;
+            std::cout << "Total objects: " << m_iTotal << std::endl;
             m_iProcessed=0;
         }
 

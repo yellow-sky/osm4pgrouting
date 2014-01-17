@@ -194,6 +194,7 @@ void Export2DB::dropTables()
                             + " DROP TABLE IF EXISTS " + tables_prefix + "classes;"
                             + " DROP TABLE IF EXISTS " + tables_prefix + "way_tag;"
 			    + " DROP TABLE IF EXISTS " + tables_prefix + "way_nodes;"
+			    + " DROP TABLE IF EXISTS " + tables_prefix + "ways_temporary;"
                             + " DROP TABLE IF EXISTS " + tables_prefix + "relations;"
                             + " DROP TABLE IF EXISTS " + tables_prefix + "relation_ways;");
 	PGresult *result = PQexec(mycon, drop_tables.c_str());
