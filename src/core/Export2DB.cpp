@@ -375,7 +375,7 @@ void Export2DB::exportWays(std::vector<Way*>& ways, Configuration* config)
 	        boost::replace_all(escaped_name, "\t", "\\\t");
 	        boost::replace_all(escaped_name, "\n", "");
 	        boost::replace_all(escaped_name, "\r", "");
-	        row_data += escaped_name.substr(0,199);
+	        row_data += escaped_name;
 	  	}
 		row_data += "\n";
 		//cout<<row_data<<endl;
