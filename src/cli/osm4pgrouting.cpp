@@ -26,6 +26,7 @@
 #include "Node.h"
 #include "Relation.h"
 #include "Export2DB.h"
+#include "WaySplitter.h"
 
 using namespace osm;
 using namespace xml;
@@ -137,8 +138,8 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    Export2DB test(host, user, dbname, port, passwd, prefixtables);
-    if(test.connect()==1)
+    Export2DB exporter(host, user, dbname, port, passwd, prefixtables);
+    if(exporter.connect()==1)
         return 1;
 
     XMLParser parser;
@@ -160,20 +161,20 @@ int main(int argc, char* argv[])
     if( clean )
     {
       cout << "Dropping tables..." << endl;
-      test.dropTables();
+      exporter.dropTables();
     }
     
     cout << "Creating tables..." << endl;
-    test.createTables();
+    exporter.createTables();
     
     cout << "Adding tag types and classes to database..." << endl;
-    test.exportTypesWithClasses(config->m_Types);
+    exporter.exportTypesWithClasses(config->m_Types);
     
     
     //############# Load Data    
     cout << "Trying to load data" << endl;
 
-    OSMDocumentParser osmParser(*config, &test);
+    OSMDocumentParser osmParser(*config, &exporter);
 
     cout << "Trying to parse data" << endl;
 
@@ -184,19 +185,21 @@ int main(int argc, char* argv[])
         cerr << "Failed to parse data file " << file.c_str() << endl;
         return 1;
     }
-
-    
     
      //############# Export2DB
     osmParser.SaveAllBuffers();
     
     //############# Split Ways
     cout << "Split ways" << endl;
-    //document->SplitWays();
+    WaySplitter splitter(host, user, dbname, port, passwd, prefixtables);
+    if(splitter.connect()==1)
+        return 1;
+    splitter.splitWays();
+
 
     //############# CreateTopology
     cout << "Creating topology..." << endl;
-    test.createTopology();
+    exporter.createTopology();
     
 
 
