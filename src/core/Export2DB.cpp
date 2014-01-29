@@ -96,17 +96,17 @@ void Export2DB::createTables()
     }
     
     // gid cannot be "bigint" right now because pgRouting doesn't support "bigint"
-    std::string create_ways_temporary("CREATE TABLE " + tables_prefix + "ways_temporary (gid integer, class_id integer not null, length double precision, name text, x1 double precision, y1 double precision, x2 double precision, y2 double precision, reverse_cost double precision, rule text, to_cost double precision, maxspeed_forward integer, maxspeed_backward integer, osm_id bigint, priority double precision DEFAULT 1);");
-	result = PQexec(mycon, create_ways_temporary.c_str());
+    std::string create_temp_ways("CREATE TABLE " + tables_prefix + "temp_ways (gid integer, class_id integer not null, length double precision, name text, x1 double precision, y1 double precision, x2 double precision, y2 double precision, reverse_cost double precision, rule text, to_cost double precision, maxspeed_forward integer, maxspeed_backward integer, osm_id bigint, priority double precision DEFAULT 1);");
+	result = PQexec(mycon, create_temp_ways.c_str());
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
     {
         std::cerr << PQresultStatus(result);
-        std::cerr << "create ways_temporary failed: "
+        std::cerr << "create temp_ways failed: "
         << PQerrorMessage(mycon)
         << std::endl;
         PQclear(result);
     } else {
-        std::cout << "Ways_temporary table created" << std::endl;
+        std::cout << "Temp_ways table created" << std::endl;
     }
 
     std::string create_types("CREATE TABLE " + tables_prefix + "types (id integer PRIMARY KEY, name text);");
@@ -133,16 +133,28 @@ void Export2DB::createTables()
         std::cout << "Way_tag table created" << std::endl;
     }
     
-    std::string create_way_nodes("CREATE TABLE " + tables_prefix + "way_nodes (id SERIAL, way_id bigint, node_id bigint);");
-	result = PQexec(mycon, create_way_nodes.c_str());
+        std::string create_temp_way_tag("CREATE TABLE " + tables_prefix + "temp_way_tag (type_id integer, class_id integer, way_id bigint);");
+	result = PQexec(mycon, create_temp_way_tag.c_str());
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
     {
-        std::cerr << "create create_way_nodes failed: "
+        std::cerr << "create temp_way_tag failed: "
         << PQerrorMessage(mycon)
         << std::endl;
         PQclear(result);
 	} else {
-        std::cout << "Way_nodes table created" << std::endl;
+        std::cout << "Temp_way_tag table created" << std::endl;
+    }
+    
+    std::string create_temp_way_node("CREATE TABLE " + tables_prefix + "temp_way_node (id SERIAL, way_id bigint, node_id bigint);");
+	result = PQexec(mycon, create_temp_way_node.c_str());
+	if (PQresultStatus(result) != PGRES_COMMAND_OK)
+    {
+        std::cerr << "create temp_way_node failed: "
+        << PQerrorMessage(mycon)
+        << std::endl;
+        PQclear(result);
+	} else {
+        std::cout << "Temp_way_node table created" << std::endl;
     }
 
     std::string create_relations("CREATE TABLE " + tables_prefix + "relations (relation_id bigint, type_id integer, class_id integer, name text);");
@@ -193,8 +205,9 @@ void Export2DB::dropTables()
                             + " DROP TABLE IF EXISTS " + tables_prefix + "types;"
                             + " DROP TABLE IF EXISTS " + tables_prefix + "classes;"
                             + " DROP TABLE IF EXISTS " + tables_prefix + "way_tag;"
-			    + " DROP TABLE IF EXISTS " + tables_prefix + "way_nodes;"
-			    + " DROP TABLE IF EXISTS " + tables_prefix + "ways_temporary;"
+			    + " DROP TABLE IF EXISTS " + tables_prefix + "temp_way_tag;"
+			    + " DROP TABLE IF EXISTS " + tables_prefix + "temp_way_node;"
+			    + " DROP TABLE IF EXISTS " + tables_prefix + "temp_ways;"
                             + " DROP TABLE IF EXISTS " + tables_prefix + "relations;"
                             + " DROP TABLE IF EXISTS " + tables_prefix + "relation_ways;");
 	PGresult *result = PQexec(mycon, drop_tables.c_str());
@@ -304,7 +317,7 @@ void Export2DB::exportWays(std::vector<Way*>& ways, Configuration* config)
 {
 	std::vector<Way*>::iterator it_way( ways.begin() );
 	std::vector<Way*>::iterator last_way( ways.end() );
-    std::string copy_way_tag( "COPY " + tables_prefix + "way_tag(type_id, class_id, way_id) FROM STDIN");
+    std::string copy_way_tag( "COPY " + tables_prefix + "temp_way_tag(type_id, class_id, way_id) FROM STDIN");
 	PGresult* res = PQexec(mycon, copy_way_tag.c_str());
 	PQclear(res);
 	while( it_way!=last_way )
@@ -329,7 +342,7 @@ void Export2DB::exportWays(std::vector<Way*>& ways, Configuration* config)
 	PQendcopy(mycon);
 
 	it_way = ways.begin();
-    std::string copy_ways( "COPY " + tables_prefix + "ways_temporary(gid, class_id, length, osm_id, reverse_cost, maxspeed_forward, maxspeed_backward, priority, name) FROM STDIN");
+    std::string copy_ways( "COPY " + tables_prefix + "temp_ways(gid, class_id, length, osm_id, reverse_cost, maxspeed_forward, maxspeed_backward, priority, name) FROM STDIN");
 	res = PQexec(mycon, copy_ways.c_str());
 	while( it_way!=last_way )
 	{
@@ -385,7 +398,7 @@ void Export2DB::exportWays(std::vector<Way*>& ways, Configuration* config)
 	PQendcopy(mycon);
 	
 	it_way = ways.begin();
-    std::string copy_way_nodes( "COPY " + tables_prefix + "way_nodes(way_id, node_id) FROM STDIN");
+    std::string copy_way_nodes( "COPY " + tables_prefix + "temp_way_node(way_id, node_id) FROM STDIN");
 	res = PQexec(mycon, copy_way_nodes.c_str());
 	PQclear(res);
 	while( it_way!=last_way )

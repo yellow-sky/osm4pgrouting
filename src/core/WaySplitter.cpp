@@ -73,7 +73,7 @@ void WaySplitter::splitWays(long chunkSize)
 
 long WaySplitter::getWaysCount()
 {
-    std::string ways_count("SELECT count(*) FROM " + tables_prefix + "ways_temporary;");
+    std::string ways_count("SELECT count(*) FROM " + tables_prefix + "temp_ways;");
     PGresult *result = PQexec(mycon, ways_count.c_str());
     if (PQresultStatus(result) != PGRES_TUPLES_OK) {
         std::cerr << "Count ways failed: " << PQerrorMessage(mycon) << std::endl;
@@ -87,7 +87,7 @@ long WaySplitter::getWaysCount()
 
 void WaySplitter::createPointsIndex()
 {
-    std::string create_index("CREATE INDEX idx_" + tables_prefix + "_way_nodes_nodeid ON " + tables_prefix + "way_nodes (node_id ASC NULLS LAST);");
+    std::string create_index("CREATE INDEX " + tables_prefix + "_temp_way_node_nodeid_idx ON " + tables_prefix + "temp_way_node (node_id ASC NULLS LAST);");
     PGresult *result = PQexec(mycon, create_index.c_str());
     if (PQresultStatus(result) != PGRES_COMMAND_OK) {
         std::cerr << "Index creation failed: " << PQerrorMessage(mycon) << std::endl;
@@ -99,7 +99,7 @@ void WaySplitter::createPointsIndex()
 
 void WaySplitter::createCountColumn()
 {
-    std::string add_column("ALTER TABLE " + tables_prefix + "way_nodes ADD COLUMN num_of_use integer;");
+    std::string add_column("ALTER TABLE " + tables_prefix + "temp_way_node ADD COLUMN num_of_use integer;");
     PGresult *result = PQexec(mycon, add_column.c_str());
     if (PQresultStatus(result) != PGRES_COMMAND_OK) {
         std::cerr << "Add column failed: " << PQerrorMessage(mycon) << std::endl;
@@ -111,7 +111,7 @@ void WaySplitter::createCountColumn()
 
 void WaySplitter::fillPointsCount()
 {
-    std::string add_column("UPDATE " + tables_prefix + "way_nodes t1 SET num_of_use = (SELECT count(*) from " + tables_prefix + "way_nodes t2 where t2.node_id=t1.node_id)");
+    std::string add_column("UPDATE " + tables_prefix + "temp_way_node t1 SET num_of_use = (SELECT count(*) from " + tables_prefix + "temp_way_node t2 where t2.node_id=t1.node_id)");
     PGresult *result = PQexec(mycon, add_column.c_str());
     if (PQresultStatus(result) != PGRES_COMMAND_OK) {
         std::cerr << "Point counts update failed: " << PQerrorMessage(mycon) << std::endl;
@@ -120,6 +120,3 @@ void WaySplitter::fillPointsCount()
         std::cout << "Point counts update" << std::endl;
     }
 }
-
-
-
