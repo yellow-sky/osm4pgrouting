@@ -63,12 +63,12 @@ void WaySplitter::splitWays(long chunkSize)
     
     long waysCount = getWaysCount();
     long processed = 0;
-    while(processed<waysCount)
-    {
+    //while(processed<waysCount)
+    //{
       //ways = getWays(chunkSize, processed);
       //points = getPoints(chunkSize, processed);
       //need 
-    }
+    //}
 }
 
 long WaySplitter::getWaysCount()
