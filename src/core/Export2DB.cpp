@@ -96,7 +96,7 @@ void Export2DB::createTables()
     }
     
     // gid cannot be "bigint" right now because pgRouting doesn't support "bigint"
-    std::string create_temp_ways("CREATE TABLE " + tables_prefix + "temp_ways (gid integer, class_id integer not null, length double precision, name text, reverse_cost double precision, rule text, maxspeed_forward integer, maxspeed_backward integer, osm_id bigint, priority double precision DEFAULT 1);");
+    std::string create_temp_ways("CREATE TABLE " + tables_prefix + "temp_ways (gid integer, class_id integer not null, oneway smallint, name text, rule text, maxspeed_forward integer, maxspeed_backward integer, osm_id bigint, priority double precision DEFAULT 1);");
 	result = PQexec(mycon, create_temp_ways.c_str());
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
     {
@@ -342,32 +342,23 @@ void Export2DB::exportWays(std::vector<Way*>& ways, Configuration* config)
 	PQendcopy(mycon);
 
 	it_way = ways.begin();
-    std::string copy_ways( "COPY " + tables_prefix + "temp_ways(gid, class_id, length, osm_id, reverse_cost, maxspeed_forward, maxspeed_backward, priority, name) FROM STDIN");
+    std::string copy_ways( "COPY " + tables_prefix + "temp_ways(gid, class_id, oneway, osm_id, maxspeed_forward, maxspeed_backward, priority, name) FROM STDIN");
 	res = PQexec(mycon, copy_ways.c_str());
 	while( it_way!=last_way )
 	{
 		Way* way = *it_way++;
 		std::string row_data = TO_STR(way->id);
 		row_data += "\t";
+
 		row_data += TO_STR(config->FindClass(way->type, way->clss)->id);
 		row_data += "\t";
-		//row_data += TO_STR(way->length);
-		//length based on oneway
-		if(way->oneWayType==REVERSED)
-			row_data += TO_STR(way->length*1000000);
-		else
-			row_data += TO_STR(way->length);
 
+		//oneway
+		row_data += TO_STR(way->oneWayType);
 		row_data += "\t";
+
+		//osm_id
 		row_data += TO_STR(way->osm_id);
-		row_data += "\t";
-
-		//reverse_cost
-		if(way->oneWayType==YES)
-	    	row_data += TO_STR(way->length*1000000);
-		else
-			row_data += TO_STR(way->length);
-
 		row_data += "\t";
 
 		//maxspeed
