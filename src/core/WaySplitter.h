@@ -64,6 +64,9 @@ private:
 	void fillPointsCount();
 	void createPointsIndex();
 	long getWaysCount();
+	
+	void createWayNodesIndex();
+	void createWayTagsIndex();
 
 };
 

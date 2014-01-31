@@ -57,18 +57,17 @@ int WaySplitter::connect()
 
 void WaySplitter::splitWays(long chunkSize)
 {
+    //points count
     createPointsIndex();
     createCountColumn();
     fillPointsCount();
     
-    long waysCount = getWaysCount();
-    long processed = 0;
-    //while(processed<waysCount)
-    //{
-      //ways = getWays(chunkSize, processed);
-      //points = getPoints(chunkSize, processed);
-      //need 
-    //}
+    //create indexes
+    createWayNodesIndex();
+    createWayTagsIndex();
+    
+    //splitt ways
+    
 }
 
 long WaySplitter::getWaysCount()
@@ -87,15 +86,41 @@ long WaySplitter::getWaysCount()
 
 void WaySplitter::createPointsIndex()
 {
-    std::string create_index("CREATE INDEX " + tables_prefix + "_temp_way_node_nodeid_idx ON " + tables_prefix + "temp_way_node (node_id ASC NULLS LAST);");
+    std::string create_index("CREATE INDEX " + tables_prefix + "temp_way_node_nodeid_idx ON " + tables_prefix + "temp_way_node (node_id ASC NULLS LAST);");
     PGresult *result = PQexec(mycon, create_index.c_str());
     if (PQresultStatus(result) != PGRES_COMMAND_OK) {
         std::cerr << "Index creation failed: " << PQerrorMessage(mycon) << std::endl;
         PQclear(result);
     } else {
-        std::cout << "Index created" << std::endl;
+        std::cout << "temp_way_node_nodeid_idx index created" << std::endl;
     }
 }
+
+void WaySplitter::createWayNodesIndex()
+{
+    std::string create_index("CREATE INDEX " + tables_prefix + "temp_way_node_wayid_idx ON " + tables_prefix + "temp_way_node (way_id ASC NULLS LAST);");
+    PGresult *result = PQexec(mycon, create_index.c_str());
+    if (PQresultStatus(result) != PGRES_COMMAND_OK) {
+        std::cerr << "Index creation failed: " << PQerrorMessage(mycon) << std::endl;
+        PQclear(result);
+    } else {
+        std::cout << "temp_way_node_wayid_idx index created" << std::endl;
+    }
+}
+
+void WaySplitter::createWayTagsIndex()
+{
+    std::string create_index("CREATE INDEX " + tables_prefix + "temp_way_tag_wayid_idx ON " + tables_prefix + "temp_way_tag (way_id ASC NULLS LAST);");
+    PGresult *result = PQexec(mycon, create_index.c_str());
+    if (PQresultStatus(result) != PGRES_COMMAND_OK) {
+        std::cerr << "Index creation failed: " << PQerrorMessage(mycon) << std::endl;
+        PQclear(result);
+    } else {
+        std::cout << "temp_way_tag_wayid_idx index created" << std::endl;
+    }
+}
+
+
 
 void WaySplitter::createCountColumn()
 {
