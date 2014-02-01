@@ -17,58 +17,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#ifndef WAYSPLITTER_H
-#define WAYSPLITTER_H
-#include "libpq-fe.h"
-#include "stdafx.h"
-
-
-
-/**
- * This class connects to a postgresql database. For using this class,
- * you also need to install postgis and pgrouting
- */
-
-class WaySplitter
-{
-public:
-	/**
-	 * Constructor
-	 * @param host Host address of the database
-	 * @param user a user, who has write access to the database
-	 * @param dbname name of the database
-	 *
-	 */
- 	WaySplitter(std::string host, std::string user, std::string dbname, std::string port, std::string password, std::string tables_prefix);
- 	
- 	/**
- 	 * Destructor
- 	 * closes the connection to the database
- 	 */
- 	~WaySplitter();
-
- 	//! connects to database
- 	int connect();
- 	
-	//split ways in DB
-	void splitWays(long chunkSize = 100000);
-	
-
-private:
-	PGconn *mycon;
-	std::string conninf;
-	std::string tables_prefix;
-	
-	void createCountColumn();
-	void fillPointsCount();
-	void createPointsIndex();
-	long getWaysCount();
-	
-	void createWayNodesIndex();
-	void createWayTagsIndex();
-	
-	void createAndExecSplitFunc();
-};
-
-#endif
+ 
+ #define SQL_SPLIT_FUNC "@SQL_SPLIT_FUNC@";
+ 
+ 

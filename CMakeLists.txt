@@ -17,6 +17,7 @@ SET (BUILD_SHARED_LIBS OFF) #DEFAULT STATIC LIBRARY
 SET (WITH_CLI TRUE CACHE BOOL "Determines whether osm4pgrouting console app should be built")
 
 #Main
+ADD_SUBDIRECTORY(src/sql)
 ADD_SUBDIRECTORY(src/core)
 
 IF (WITH_CLI)

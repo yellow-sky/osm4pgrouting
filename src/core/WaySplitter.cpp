@@ -19,6 +19,8 @@
  ***************************************************************************/
 #include "WaySplitter.h"
 #include "stdafx.h"
+#include "boost/algorithm/string/replace.hpp"
+#include "sql.h"
 
 using namespace std;
 
@@ -67,7 +69,7 @@ void WaySplitter::splitWays(long chunkSize)
     createWayTagsIndex();
     
     //splitt ways
-    
+    createAndExecSplitFunc();
 }
 
 long WaySplitter::getWaysCount()
@@ -145,3 +147,19 @@ void WaySplitter::fillPointsCount()
         std::cout << "Point counts update" << std::endl;
     }
 }
+
+void WaySplitter::createAndExecSplitFunc()
+{
+  std::string split_func(SQL_SPLIT_FUNC);
+  
+  boost::replace_all(split_func, "%TP%", tables_prefix);
+  PGresult *result = PQexec(mycon, split_func.c_str());
+    if (PQresultStatus(result) != PGRES_COMMAND_OK) {
+        std::cerr << "Splitting failed: " << PQerrorMessage(mycon) << std::endl;
+        PQclear(result);
+    } else {
+        std::cout << "Way was splitted" << std::endl;
+    }
+}
+
+
