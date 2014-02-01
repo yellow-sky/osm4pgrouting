@@ -85,7 +85,7 @@ BEGIN
 				rev_cost = length;
 			END IF;	
 
-			--x1-y2 (by osm2pgrouting WTF???)
+			--x1-y2 (by osm2pgrouting WTF?)
 			start_point = ST_StartPoint(segment); --first_point!!!
 			end_point = ST_EndPoint(segment);
 						
