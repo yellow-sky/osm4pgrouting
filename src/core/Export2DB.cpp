@@ -21,6 +21,10 @@
 #include "stdafx.h"
 #include "Export2DB.h"
 #include "boost/algorithm/string/replace.hpp"
+#include "boost/algorithm/string/split.hpp"
+#include "boost/algorithm/string/classification.hpp"
+#include "boost/foreach.hpp"
+
 
 #define TO_STR(x)	boost::lexical_cast<std::string>(x)
 
@@ -81,8 +85,7 @@ void Export2DB::createTables()
     }
 
 	// gid cannot be "bigint" right now because pgRouting doesn't support "bigint"
-    std::string create_ways("CREATE TABLE " + tables_prefix + "ways (gid integer, class_id integer not null, length double precision, name text, x1 double precision, y1 double precision, x2 double precision, y2 double precision, reverse_cost double precision, rule text, to_cost double precision, maxspeed_forward integer, maxspeed_backward integer, osm_id bigint, priority double precision DEFAULT 1);"
-            + " SELECT AddGeometryColumn('" + tables_prefix + "ways','the_geom',4326,'LINESTRING',2);");
+    std::string create_ways("CREATE TABLE " + tables_prefix + "ways (gid integer, class_id integer not null, length double precision, name text, x1 double precision, y1 double precision, x2 double precision, y2 double precision, reverse_cost double precision, rule text, to_cost double precision, maxspeed_forward integer, maxspeed_backward integer, osm_id bigint, priority double precision DEFAULT 1);");
 	result = PQexec(mycon, create_ways.c_str());
 	if (PQresultStatus(result) != PGRES_COMMAND_OK)
     {
@@ -93,6 +96,27 @@ void Export2DB::createTables()
         PQclear(result);
     } else {
         std::cout << "Ways table created" << std::endl;
+    }
+    
+    std::string fullName = tables_prefix + "ways";
+    std::vector<std::string> words;
+    boost::split(words, fullName, boost::is_any_of("."), boost::token_compress_on);
+    std::string params = "";
+    BOOST_FOREACH(std::string & word, words)
+    {
+      params = params + "'" + word + "', ";
+    }
+    std::string add_geom_columns_ways("SELECT AddGeometryColumn(" + params + "'the_geom',4326,'LINESTRING',2);");
+	result = PQexec(mycon, add_geom_columns_ways.c_str());
+	if (PQresultStatus(result) != PGRES_TUPLES_OK)
+    {
+        std::cerr << PQresultStatus(result);
+        std::cerr << "create ways failed: "
+        << PQerrorMessage(mycon)
+        << std::endl;
+        PQclear(result);
+    } else {
+        std::cout << "Geom columns for ways table added" << std::endl;
     }
     
     // gid cannot be "bigint" right now because pgRouting doesn't support "bigint"
