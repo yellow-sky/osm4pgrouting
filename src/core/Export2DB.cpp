@@ -254,7 +254,7 @@ void Export2DB::exportNodes(std::vector<Node*>& nodes)
 		row_data += "\t";
 		row_data += TO_STR(node->lat);
 		row_data += "\t";
-		row_data += TO_STR(node->numsOfUse);
+		row_data += TO_STR(0);
 		row_data += "\n";
 		PQputline(mycon, row_data.c_str());
 	}

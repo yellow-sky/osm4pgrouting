@@ -65,11 +65,7 @@ public:
 
 	//long long type;
 	//long long clss;
-	
-	//! geometry of the street
-	std::string geom;
-	//! length of the street
-	double length;
+
 
 	int maxspeed_forward;
 	int maxspeed_backward;

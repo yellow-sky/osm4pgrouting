@@ -29,7 +29,6 @@ Way::Way( long long id, bool visible, long long osm_id, int maxspeed_forward, in
 :
 	id(id),
 	visible(visible),
-	length(0),
 	oneWayType(NO),
 	osm_id(osm_id),
 	maxspeed_forward(maxspeed_forward),

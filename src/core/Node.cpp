@@ -30,7 +30,6 @@ Node::Node( long long id, double lat, double lon )
 	lat(lat),
 	lon(lon)
 {
-	this->numsOfUse=0;
 }
 
 Node::~Node()

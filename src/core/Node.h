@@ -41,10 +41,7 @@ public:
 	double lat;
 	//! longitude coordinate
 	double lon;
-	/**
-	 *	counts the rate, how much this node is used in different ways
-	 */
-	unsigned short numsOfUse;
+
 public:
 	/**
 	 *	Construktor
