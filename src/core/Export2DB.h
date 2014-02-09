@@ -21,7 +21,6 @@
 #ifndef EXPORT2DB_H
 #define EXPORT2DB_H
 
-//#include "postgresql/libpq-fe.h"
 #include "libpq-fe.h"
 #include "Node.h"
 #include "Way.h"
